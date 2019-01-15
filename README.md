@@ -1,8 +1,6 @@
-# Best practices for designing and implementing a REST-API 
+## REST-API Cheat Sheet [see also](https://hersengarage.nl/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
 Initially created for Dutch Railways NS. Based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat-sheet)
-
-## REST-API Cheat Sheet [see also](https://hersengarage.nl/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
