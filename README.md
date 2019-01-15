@@ -7,7 +7,7 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
   * Not for a specific front-end.
-  * Use a domain model.
+  * Use a domain model ([example domain model](https://imgur.com/55qxMz6.png)).
   * Use use-cases and scenarios to validate your APIs UX.
 
 - A good API (or any other interface) is
