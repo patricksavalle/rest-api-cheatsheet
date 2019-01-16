@@ -20,10 +20,11 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
 
 - Base resources and URLs on the entities and relationships of your domain model.
 
+- Create a Swagger or OpenAPI file for your API before you start implementing the REST-server
+
+- Use a naming convention
+
   * Use plural forms for resources (```orders``` instead of ```order```), it's the datamodelling standard.
-
-- Create a Swagger or OpenAPI file for your API
-
   * Use lowercase in constant parts of paths, e.g: ```/lowercase```, not ```/CamelCase``` or ```/UPPERCASE```.
   * Use camelCase field names, e.g.: ```fieldName```, not ```FieldName``` or ```field_name```
   * Use CamelCase object names, e.g.: ```TicketObject```, not ```ticketObject``` or ```ticket_object```
