@@ -1,11 +1,11 @@
 ## REST-API Cheat Sheet [see also](https://hersengarage.nl/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
-Initially created for Dutch Railways NS. Based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat-sheet)
+Initially created for Dutch Railways NS. Based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat-sheet).
 
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
   * Not for a specific front-end.
-  * Use a domain model ([example domain model](https://imgur.com/55qxMz6.png)).
+  * Use a domain model ([example domain model](https://imgur.com/55qxMz6h.png)).
   * Use use-cases and scenarios to validate your APIs UX.
 
 - A good API (or any other interface) is
