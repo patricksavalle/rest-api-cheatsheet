@@ -1,4 +1,4 @@
-## REST-API Cheat Sheet [see also](https://hersengarage.nl/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
+## REST-API Cheat Sheet [see also 'REST design patterns'](https://hersengarage.nl/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
 Initially created for Dutch Railways NS. Based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat-sheet).
 
