@@ -55,11 +55,16 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
         GET /wholes/{wholeId}
         GET /wholes/{wholeId}/parts/{partId}
         GET /wholes/{wholeId}/parts/{partId}/subparts/{subpartId}
-
+        
+  * Don't be dogmatic, flat URLs are sometimes needed. 
+  
+        e.g.
+        
+        GET /parts/[subpartid}]
 
 - Evolution over versioning.
 
-  * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time to enable the linking strategy.
+  * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time.
 
         e.g.
 
@@ -78,7 +83,7 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
 
 - Use the HTTP verbs to mean this:
 
-    * POST - create and other non-idempotent operations.
+    * POST - create and all other non-idempotent operations.
     * PUT - replace.
     * PATCH - (partial) update.
     * GET - read a resource or collection.
@@ -119,6 +124,8 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
 - Use ISO 4217 for currency codes.
 
 - Use ISO 3166 for country codes.
+
+-	Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)
 
 - Use [OAuth2](http://oauth.net/2/) to secure your API.
   * Use an auto-expiring Bearer token for authentication (```Authorisation: Bearer f0ca4227-64c4-44e1-89e6-b27c62ac2eb6```).
