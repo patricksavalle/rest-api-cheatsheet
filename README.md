@@ -110,7 +110,7 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
 
 - Support link expansion of relationships. Allow clients to expand the data contained in the response by including additional representations instead of, or in addition to, links.
 
-- Allow clients to select the fields that come back in the response (with query-arguments, ```?fields=name&fields=address&fields=city```)
+- For large responses, allow clients to select the fields that come back in the response (with query-arguments, ```?fields=name&fields=address&fields=city```)
 
 - Use ISO 8601 for dates. 
 
@@ -138,7 +138,7 @@ Initially created for Dutch Railways NS. Based on [this cheatsheet](https://gith
       Content-Type: application/json
       Accept-Type: application/json
 
-- Enforce the use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```
+- For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```
 
 - Consider Cache-ability. At a minimum, use the following response headers:
     * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
