@@ -83,16 +83,19 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
         GET /parts/[subpartid}]
         GET /frontpage
 
-- Keep the API backward compatible as long as possible / avoid breaking changes
-
+- Use [SimVer](https://simver.org/) versioning 
+  * A normal version number MUST take the form X.Y. X is the major version and Y is the minor version.
+  * Minor version MUST be incremented for any release which maintains backwards compatibility to the public API.
+  * Major version MUST be incremented if any backwards incompatible changes are introduced to the public API.
+  * Keep the API backward compatible as long as possible / avoid breaking changes
   * API's based on a domain model are the most stable
   * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time.
 
         e.g.
 
-        https://api.example.com/1/orders
+        https://api.example.com/v1.0/orders
 
-  * Versioning via the Accept header is versioning the resource.
+  * Versioning via the Accept header is versioning the resource, avoid this.
 
         e.g.
 
