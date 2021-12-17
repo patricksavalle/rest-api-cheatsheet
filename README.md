@@ -83,7 +83,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
         GET /parts/[subpartid}]
         GET /frontpage
 
-- Use [SimVer](https://simver.org/) versioning 
+- Use [Simple Versioning](https://simver.org/)
   * A normal version number MUST take the form X.Y. X is the major version and Y is the minor version.
   * Minor version MUST be incremented for any release which maintains backwards compatibility to the public API.
   * Major version MUST be incremented if any backwards incompatible changes are introduced to the public API.
