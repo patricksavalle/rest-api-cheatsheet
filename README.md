@@ -147,14 +147,15 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```
 
-- Consider Cache-ability. At a minimum, use the following response headers:
-    * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
+- All endpoint return the Date header
     * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
-    * Cache-Control - The maximum number of seconds (max age) a response can be cached. However, if caching is not supported for the response, then no-cache is the value. (```Cache-Control: 360``` or ```Cache-Control: no-cache```)
-    * Expires - If max age is given, contains the timestamp (in RFC1123 format) for when the response expires, which is the value of Date (e.g. now) plus max age. If caching is not supported for the response, this header is not present. (```Expires: Sun, 06 Nov 1994 08:49:37 GMT```)
-    * Pragma - When Cache-Control is 'no-cache' this header is also set to 'no-cache'. Otherwise, it is not present. (```Pragma: no-cache```)
-    * Last-Modified - The timestamp that the resource itself was modified last (in RFC1123 format). (```Last-Modified: Sun, 06 Nov 1994 08:49:37 GMT```)
 
-    * Leave caching to the APIM or reverse proxy (e.g. NGINX) based on the response-headers, don't build this into the REST-server itself
+- Allow for transport caching. As a minimum have public GET-endpoints return the following response headers:
+    * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: 360```)
+    * Expires - If max age is given, contains the timestamp (in RFC1123 format) for when the response expires, which is the value of Date (e.g. now) plus max age. If caching is not supported for the response, this header is not present. (```Expires: Sun, 06 Nov 1994 08:49:37 +0100```)
+    * Last-Modified - The timestamp that the resource itself was modified last (in RFC1123 format). (```Last-Modified: Sun, 06 Nov 1994 08:49:37 +0100```)
+    * Also look into :
+      * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
 
 
+    * Leave caching to the clients or APIM or reverse proxy (e.g. NGINX) based on the response-headers, don't build this into the REST-server itself.
