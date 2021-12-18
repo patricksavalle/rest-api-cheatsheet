@@ -129,6 +129,8 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - Use ISO 3166 for country codes.
 
+- Use [RFC7807](https://tools.ietf.org/html/rfc7807) for errormessages.
+
 - Avoid HATEOAS, while elegent hypermedia linking (HATEOAS) and versioning is troublesome no matter what--minimize it.
 
 -	Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)
@@ -145,7 +147,11 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
       Content-Type: application/json
       Accept-Type: application/json
 
-- For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```
+- Responses contain header: ```X-Content-Type-Options: nosniff```
+
+- Responses contain header: ```X-Frame-Options: deny```
+
+- For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```)
 
 - All endpoint return the Date header
     * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
@@ -159,3 +165,6 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 
     * Leave caching to the clients or APIM or reverse proxy (e.g. NGINX) based on the response-headers, don't build this into the REST-server itself.
+
+- No privacy or security compromising data in URL's or responses
+
