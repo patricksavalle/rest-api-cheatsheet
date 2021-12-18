@@ -168,3 +168,9 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - No privacy or security compromising data in URL's or responses
 
+- Use the X-Signing-Algorithm header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
+
+- Use the X-SHA256-Checksum header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
+
+- Use the X-Encryption-Algorithm header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+
