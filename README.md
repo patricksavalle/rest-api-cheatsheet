@@ -168,13 +168,13 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - No privacy or security compromising data in URL's or responses
 
-- Use the X-Signing-Algorithm header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
+- Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
 
-- Use the X-SHA256-Checksum header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
+- Use the **X-SHA256-Checksum** header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
 
-- Use the X-Encryption-Algorithm header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+- Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
 
 - When content signing is used, this is done after the content is (optionally) encrypted.
 
-- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the X-Request-ID request header which will be echoed in the X-Response-ID response header. This enables clients to correlates requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```) 
+- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the **X-Request-ID** request header which will be echoed in the **X-Response-ID** response header. This enables clients to correlate requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```) 
 
