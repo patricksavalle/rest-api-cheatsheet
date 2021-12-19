@@ -156,7 +156,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 - All endpoint return the Date header
     * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
 
-- Allow for transport caching. As a minimum have public GET-endpoints return the following response headers:
+- Allow for (transport) caching. As a minimum have public GET-endpoints return the following response headers:
     * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: 360```)
     * Expires - If max age is given, contains the timestamp (in RFC1123 format) for when the response expires, which is the value of Date (e.g. now) plus max age. If caching is not supported for the response, this header is not present. (```Expires: Sun, 06 Nov 1994 08:49:37 +0100```)
     * Last-Modified - The timestamp that the resource itself was modified last (in RFC1123 format). (```Last-Modified: Sun, 06 Nov 1994 08:49:37 +0100```)
@@ -173,4 +173,8 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 - Use the X-SHA256-Checksum header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
 
 - Use the X-Encryption-Algorithm header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+
+- When content signing is used, this is done after the content is (optionally) encrypted.
+
+- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the X-Request-ID request header which will be echoed in the X-Response-ID response header. This enables clients to correlates requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```) 
 
