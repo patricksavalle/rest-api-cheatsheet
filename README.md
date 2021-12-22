@@ -158,8 +158,6 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - Allow for (transport) caching. As a minimum have public GET-endpoints return the following response headers:
     * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: 360```)
-    * Expires - If max age is given, contains the timestamp (in RFC1123 format) for when the response expires, which is the value of Date (e.g. now) plus max age. If caching is not supported for the response, this header is not present. (```Expires: Sun, 06 Nov 1994 08:49:37 +0100```)
-    * Last-Modified - The timestamp that the resource itself was modified last (in RFC1123 format). (```Last-Modified: Sun, 06 Nov 1994 08:49:37 +0100```)
     * Also look into :
       * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
 
