@@ -159,7 +159,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 - Allow for (transport) caching. As a minimum have public GET-endpoints return the following response headers:
     * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: 360```)
     * Also look into :
-      * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
+      * ETag - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```)
 
 - No privacy or security compromising data in URL's or responses
 
