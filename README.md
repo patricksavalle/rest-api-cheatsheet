@@ -161,9 +161,6 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
     * Also look into :
       * ETag - An arbitrary string for the version of a representation. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "686897696a7c876b7e"```)
 
-
-    * Leave caching to the clients or APIM or reverse proxy (e.g. NGINX) based on the response-headers, don't build this into the REST-server itself.
-
 - No privacy or security compromising data in URL's or responses
 
 - Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
