@@ -157,7 +157,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
     * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
 
 - Allow for (transport) caching. As a minimum have public GET-endpoints return the following response headers:
-    * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: 360```)
+    * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360```)
     * Also look into :
       * ETag - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```)
 
