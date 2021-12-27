@@ -47,6 +47,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
   * 201 - Created. Returned on successful creation of a new resource. Include a 'Location' header with a link to the newly-created resource.
   * 202 - Accepted. Returned to indicated an asynchronous response will be given. Include a 'Location' HTTP-header with URL of the future resource. See also 102 Processing.
   * 204 - No content (for empty responses)
+  * 304 - Not modified. Returned when a client asks for an etag it already received (sent in the request headers). See _caching_ below.
   * 400 - Bad request. Data issues such as invalid JSON, etc.
   * 404 - Not found. Resource not found on GET.
   * 409 - Conflict. Duplicate data or invalid data state would occur.
@@ -84,7 +85,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
         GET /frontpage
 
 - Use [Simple Versioning](https://simver.org/)
-  * A normal version number MUST take the form X.Y. X is the major version and Y is the minor version.
+  * A normal version number MUST take the form X.Y where X is the major version and Y is the minor version.
   * Minor version MUST be incremented for any release which maintains backwards compatibility to the public API.
   * Major version MUST be incremented if any backwards incompatible changes are introduced to the public API.
   * Keep the API backward compatible as long as possible / avoid breaking changes
@@ -159,7 +160,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 - Allow for (transport) caching. As a minimum have public GET-endpoints return the following response headers:
     * Cache-Control - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360```)
     * Also look into :
-      * ETag - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```)
+      * ETag - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```). The client needs to send a **[If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)** header for this mechanism to work.
 
 - No privacy or security compromising data in URL's or responses
 
