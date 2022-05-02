@@ -132,14 +132,14 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
 - Use [RFC7807](https://tools.ietf.org/html/rfc7807) for errormessages.
 
-- Avoid HATEOAS, while elegent hypermedia linking (HATEOAS) and versioning is troublesome no matter what--minimize it.
+- Avoid HATEOAS, while elegant hypermedia linking (HATEOAS) and versioning is troublesome no matter what--minimize it.
 
--	Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)
+-	Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)--stick to basic REST.
 
 - Use [OAuth2](http://oauth.net/2/) to secure your API.
   * Use an auto-expiring Bearer token for authentication (```Authorisation: Bearer f0ca4227-64c4-44e1-89e6-b27c62ac2eb6```).
   * Require HTTPS.
-  * Copnsider using [JSON Web Tokens](https://jwt.io/).
+  * Consider using [JSON Web Tokens](https://jwt.io/).
 
 - Enforce use of the Content-Type and Accept-Type headers even if you use JSON as default for both requests and responses.
 
@@ -161,11 +161,11 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
     * [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360``` or ```Cache-Control: no-store```)
     * Strong caching minimizes the number of requests a server receives
 
-- Allow for weak caching through the ETag respons-header
+- Allow for weak caching through the ETag response-header
     * [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```). The client needs to send a **[If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)** header for this mechanism to work.
     * Weak caching minimizes the work a server needs to do (but not the number of requests it receives)
 
-- No privacy or security compromising data in URL's or responses
+- No privacy or security compromising data in URL's 
 
 - Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
 
