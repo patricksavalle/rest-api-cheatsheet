@@ -157,11 +157,13 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 - All endpoint return the Date header
     * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
 
-- Allow for (client, transport, proxy) strong caching through the cache-control response-header. As a minimum have public GET-endpoints return the following response headers:
+- Allow for strong caching in (client, transport, proxy, etc.) through the cache-control response-header. As a minimum have public GET-endpoints return the following response headers:
     * [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360``` or ```Cache-Control: no-store```)
+    * Strong caching minimizes the number of requests a server receives
 
 - Allow for weak caching through the ETag respons-header
       * [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```). The client needs to send a **[If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)** header for this mechanism to work.
+    * Weak caching minimizes the work a server needs to do (but not the number of requests it receives)
 
 - No privacy or security compromising data in URL's or responses
 
