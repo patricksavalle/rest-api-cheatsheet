@@ -76,6 +76,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
 
         GET /wholes/$id           // returns a 'whole'
         GET /parts/wholeid/$id    // returns 'parts' for a specified whole
+        GET /parts/partsid/$id    // returns a part by it id 
         
   * Don't be dogmatic, flat and non-domain-model URLs are sometimes needed. 
   
