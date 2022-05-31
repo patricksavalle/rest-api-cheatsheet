@@ -91,11 +91,12 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
   * Major version MUST be incremented if any backwards incompatible changes are introduced to the public API.
   * Keep the API backward compatible as long as possible / avoid breaking changes
   * API's based on a domain model are the most stable
-  * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time.
+  * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time
+  * Use only major versions in the url as newer minor versions are (should be) backward compatible
 
         e.g.
 
-        https://api.example.com/v1.0/orders
+        https://api.example.com/v1/orders
 
   * Versioning via the Accept header is versioning the resource, avoid this.
 
