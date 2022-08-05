@@ -1,8 +1,20 @@
 # REST-API Cheat Sheet 
 
-[See also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
-
 > Use this standard to build and review your REST-API's. It's highly evolved and in use with multiple large Dutch companies.
+> 
+> 
+> Contents:
+> 
+> - Coding Conventions
+> - Server Template
+> - Error code decision table
+> - Asynchronuous communication patterns
+>   - Using webhooks (server to server / bi-directional)
+>   - Using polling (web to server / uni-directional)
+>
+> [See also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
+
+# Coding Conventions
 
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
@@ -228,22 +240,21 @@
 - Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
 
 
-# REST server processing pipeline
+# Server Template
 
 On the implementation level, every response is transformed into a request in the following steps:
 
 1. check authentication
 1. check URL 
 1. check authorisation
-1. validate, decode, decrypt input
+1. validate, decrypt input
 1. **do the actual transformation / CRUD**
-1. filter, encode, encrypt output
+1. encode, encrypt output
 1. (optionally) send notifications (broadcast the event)
 
 Don’t use complex design patterns, a REST-server is ‘just’ a pipeline.
 
 # Error code decision table
-
 
 |         | Authenticated | Valid URL | Authorized | status code      |
 |---------|---------------|-----------|------------|------------------|
@@ -276,8 +287,6 @@ In asynchronuous communication the client does not wait for the answer but eithe
 ## Using polling (web to server / uni-directional)
 
 > Client does GET on async endpoint 
->> Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
->
 >> Server responds with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
 
 
