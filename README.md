@@ -6,6 +6,7 @@
 > Contents:
 > 
 > - Coding Conventions
+> - Health Check
 > - Server Template
 > - Error code decision table
 > - Asynchronuous communication patterns
@@ -240,6 +241,32 @@
 - Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
 
 
+# Health check
+
+- Implement and monitor an uncached ```/health endpoint```, e.g.
+
+
+    GET /api/health
+    
+    {
+        "healthy": true,
+        "dependencies": [
+            {
+                "name": "serviceA",
+                "healthy": true
+            },
+            {
+                "name": "serviceB",
+                "healthy": true
+            }
+        ]
+    }
+
+- Code for observability (logging, tracing, metrics) 
+- Code for testability (feature toggles, user rings, failure injection, etc.)
+- Monitor Request Latency, Error-rate, Traffic and Cumulative Latency for individual endpoints 
+
+
 # Server Template
 
 On the implementation level, every response is transformed into a request in the following steps:
@@ -272,24 +299,24 @@ In asynchronuous communication the client does not wait for the answer but eithe
 
 
 > Client does GET on async endpoint  
->> Client must supply the webhook in the ```X-Callback-Url``` header
-> 
->> Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
->
->> Server responds with a status code ```202 Accepted``` indicating processing has started
+> - Client must supply the webhook in the ```X-Callback-Url``` header
+> - Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
+> - Server responds with a status code ```202 Accepted``` indicating processing has started
 
-> Server does POST with result on client webhook
->> Server must echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
+> REPEAT
+>> Server does POST with result on client webhook
+>> - Server must echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
 >
->> Server must do progressive retries until the webhook returns a status code ```200 Ok```
+> UNTIL (webhook returns a status code ```200 Ok```OR timed out)
 
 
 ## Using polling (web to server / uni-directional)
 
 > Client does GET on async endpoint 
->> Server responds with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
+> - Server responds with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
 
-
-> Client does GET on the returned URL 
->> Client must retry as long as the server responds with status ```102 Processing```
+> DO
+>> Client does GET on the returned URL 
+> 
+> WHILE (server responds with status ```102 Processing``` AND NOT timed out)
 
