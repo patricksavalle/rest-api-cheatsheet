@@ -75,12 +75,6 @@
   * 409 - Conflict. Duplicate data or invalid data state would occur.
 
 
-- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the **X-Request-ID** request header which will be echoed in the **X-Response-ID** response header. This enables clients to correlate requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```)
-
-
-- Outgoing requests to external webhooks require HMAC-SHA256 signing for request authentication (use header ```X-Signing-Algorithm: RS256```)
-
-
 - Use the Collection Metaphor, it's intuitive.
 
     * Two URLs per public resource in the domain model:
@@ -223,7 +217,7 @@
 - No privacy or security compromising data in URL's
 
 
-**For API's that need content encrypytion**
+**For API's that need content / payload encrypytion**
 
 
 - Implement content encryption on the furthest endpoints (in the REST-server, not the proxies or APIM)
@@ -239,6 +233,7 @@
 
 
 - Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+
 
 
 # Health check
@@ -306,6 +301,7 @@ In asynchronuous communication the client does not wait for the answer but eithe
 > REPEAT
 >> Server does POST with result on client webhook
 >> - Server must echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
+>> - Server must use HMAC-SHA256 signing for request authentication (use header ```X-Signing-Algorithm: RS256```)
 >
 > UNTIL (webhook returns a status code ```200 Ok```OR timed out)
 
@@ -313,7 +309,8 @@ In asynchronuous communication the client does not wait for the answer but eithe
 ## Using polling (web to server / uni-directional)
 
 > Client does GET on async endpoint 
-> - Server responds with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
+> - Server responds with status ```202 Accepted``` indicating processing has started
+> - Server returns the URL of the future resource in the ```Location``` header 
 
 > DO
 >> Client does GET on the returned URL 
