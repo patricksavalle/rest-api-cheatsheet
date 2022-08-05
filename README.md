@@ -1,11 +1,12 @@
 ## REST-API Cheat Sheet [see also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
-Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat-sheet).
+> Use this standard to build and review your REST-API's. It's highly evolved and in use with multiple large Dutch companies.
 
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
   * Not for a specific front-end.
   * Use use-cases and scenarios to validate your APIs UX.
+
 
 - A good API (as any other interface) is
 
@@ -17,10 +18,13 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
   * Self explaining
   * Documented (if self explanation is not sufficient)
 
+
 - Use a domain model ([example domain model](https://i.imgur.com/55qxMz6h.png)), even if it needs to be reverse engineered (keep it simple)
   * Base resources and URLs on the entities and relationships of your domain model.
 
+
 - Create an OpenAPI file for your API before you start implementing the REST-server
+
 
 - Use a naming convention
 
@@ -31,6 +35,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
   *	Avoid snake_case and kebab-case.
 
 
+
 - Use the HTTP verbs to mean this:
 
     * POST - create and all other non-idempotent operations.
@@ -39,7 +44,9 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
     * GET - read a resource or collection.
     * DELETE - remove a resource or collection.
 
+
 - Ensure that your GET, PUT, PATCH and DELETE operations are all [idempotent](http://www.restapitutorial.com/lessons/idempotency.html).
+
 
 - Use [HTTP status codes](https://httpstatuses.com/) to be meaningful.
   * 102 - Processing. Returned as long as a asynchronous response is still pending. See also 202 Accepted.
@@ -52,7 +59,14 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
   * 404 - Not found. Resource not found on GET.
   * 409 - Conflict. Duplicate data or invalid data state would occur.
 
-- Use the Collection Metaphor.
+
+- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the **X-Request-ID** request header which will be echoed in the **X-Response-ID** response header. This enables clients to correlate requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```)
+
+
+- Outgoing requests to external webhooks require HMAC-SHA256 signing for request authentication (use header ```X-Signing-Algorithm: RS256```)
+
+
+- Use the Collection Metaphor, it's intuitive.
 
     * Two URLs per public resource in the domain model:
 
@@ -67,6 +81,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
             PUT /orders/orderid/$id
             PATCH /orders/orderid/$id
             DELETE /orders/orderid/$id
+
             
 - Reflect the hierarchy of the domain model in the URLs, use the same names
 
@@ -84,6 +99,7 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
         
         GET /parts/[subpartid}]
         GET /frontpage
+
 
 - Use [Simple Versioning](https://simver.org/)
   * A normal version number MUST take the form X.Y where X is the major version and Y is the minor version.
@@ -107,17 +123,22 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
         Accept: application/vnd.example.api+json;version=2
 
   * Additions to a response do not require versioning. However, additions to a request body that are 'required' are troublesome--and may require versioning (breaking changes).
+
   
-- Responses are part of the interface, don't expose implementationdetails in them.
+- Responses are part of the interface, don't expose implementation details in them.
 
   * Return domain entities not database entities (use a (logical) domain model not a (technical) data model).
   * Don’t expose internal / coupling tables as two IDs.
 
+
 - Support sorting and pagination on collections (```?offset=100&limit=50&order=id```).
+
 
 - For large responses, allow clients to select the fields that come back in the response (with query-arguments, ```?fields=name&fields=address&fields=city```)
 
+
 - Use UTF-8 character encoding.
+
 
 - Use ISO 8601 for dates. 
 
@@ -128,20 +149,27 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
       1997-07-16T19:20:30EST      # time-zone
       1997-07-16T19:20:30         # local datetime
 
+
 - Use ISO 4217 for currency codes.
+
 
 - Use ISO 3166 for country codes.
 
-- Use [RFC7807](https://tools.ietf.org/html/rfc7807) for errormessages.
+
+- Use [RFC7807](https://tools.ietf.org/html/rfc7807) for error messages.
+
 
 - Avoid HATEOAS, while elegant hypermedia linking (HATEOAS) and versioning is troublesome no matter what--minimize it.
 
+
 -	Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)--stick to basic REST.
+
 
 - Use [OAuth2](http://oauth.net/2/) to secure your API.
   * Use an auto-expiring Bearer token for authentication (```Authorisation: Bearer f0ca4227-64c4-44e1-89e6-b27c62ac2eb6```).
   * Require HTTPS.
   * Consider using [JSON Web Tokens](https://jwt.io/).
+
 
 - Enforce use of the Content-Type and Accept-Type headers even if you use JSON as default for both requests and responses.
 
@@ -150,32 +178,113 @@ Initially based on [this cheatsheet](https://github.com/RestCheatSheet/api-cheat
       Content-Type: application/json
       Accept-Type: application/json
 
+
 - Responses contain header: ```X-Content-Type-Options: nosniff```
+
 
 - Responses contain header: ```X-Frame-Options: deny```
 
+
 - For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```)
 
-- All endpoint return the Date header
-    * Date - Date and time the response was returned (in RFC1123 format). (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
 
-- Allow for strong caching in (client, transport, proxy, etc.) through the cache-control response-header. As a minimum have public GET-endpoints return the following response headers:
+- All endpoints return the Date header
+    * Date - Date and time the response was returned (in RFC1123 format) (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
+
+
+- Implement strong caching (by client, transport, proxy, etc.) through the ```cache-control``` response-header. As a minimum have public GET-endpoints return the following response headers:
     * [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360``` or ```Cache-Control: no-store```)
     * Strong caching minimizes the number of requests a server receives
 
-- Allow for weak caching through the ETag response-header
+
+- Consider weak caching through the ```ETag``` response-header 
     * [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```). The client needs to send a **[If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)** header for this mechanism to work.
     * Weak caching minimizes the work a server needs to do (but not the number of requests it receives)
 
-- No privacy or security compromising data in URL's 
 
-- Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
+- Enable header-based caching on all proxies and clients (e.g. NGINX, Apache, APIM) to increase speed and robustness
 
-- Use the **X-SHA256-Checksum** header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
 
-- Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+- No privacy or security compromising data in URL's
+
+
+**For API's that need content encrypytion**
+
+
+- Implement content encryption on the furthest endpoints (in the REST-server, not the proxies or APIM)
+
 
 - When content signing is used, this is done after the content is (optionally) encrypted.
 
-- Incoming asynchronous requests require a [V4 UUID](https://www.uuidtools.com/v4) in the **X-Request-ID** request header which will be echoed in the **X-Response-ID** response header. This enables clients to correlate requests to responses. (```X-Request-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```, ```X-Response-ID: f62e77ae-c2ba-4988-884d-e9de8f3ff1b1```) 
+
+- Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
+
+
+- Use the **X-SHA256-Checksum** header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
+
+
+- Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
+
+
+# REST server processing pipeline
+
+On the implementation level, every response is transformed into a request in the following steps:
+
+1. check authentication
+1. check URL 
+1. check authorisation
+1. validate, decode, decrypt input
+1. **do the actual transformation / CRUD**
+1. filter, encode, encrypt output
+1. (optionally) send notifications (broadcast the event)
+
+Don’t use complex design patterns, a REST-server is ‘just’ a pipeline.
+
+# Error code decision table
+
+
+|         | Authenticated | Valid URL | Authorized | status code      |
+|---------|---------------|-----------|------------|------------------|
+| Check 1 | -             | -         | -          | 401 Unauthorized |
+| Check 2 | +             | -         | -          | 404 Not found    |
+| Check 3 | +             | +         | -          | 403 Forbidden    |
+
+
+# Asynchronuous communication patterns
+
+> In asynchronuous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
+
+
+## Using webhooks (server to server / bi-directional)
+
+-
+- Client must supply the callback URL (webhook) in the ```X-Callback-Url``` header
+
+
+- Client must supply a version 4 UUID correlation id in the ```X-Request-ID``` header
+
+
+- Server must initially respond with a status code ```202 Accepted```
+
+
+- Upon completion of processing the server must POST the complete response to the webhook and echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
+
+
+- Server must do progressive retries until the webhook returns a status code 200
+
+
+![img.png](webhook-async.png)
+
+## Using polling (web to server / uni-directional)
+
+- Server must initially respond with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
+
+
+- Client must retry on the new ```location``` as long as the server responds with status ```102 Processing```
+
+
+- Processing ends when server creates the new resource
+
+
+![img.png](polling-async.png)
 
