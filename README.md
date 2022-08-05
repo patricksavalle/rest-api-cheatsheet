@@ -1,4 +1,6 @@
-## REST-API Cheat Sheet [see also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
+# REST-API Cheat Sheet 
+
+[See also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
 > Use this standard to build and review your REST-API's. It's highly evolved and in use with multiple large Dutch companies.
 
@@ -252,39 +254,33 @@ Don’t use complex design patterns, a REST-server is ‘just’ a pipeline.
 
 # Asynchronuous communication patterns
 
-> In asynchronuous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
+In asynchronuous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
 
 
 ## Using webhooks (server to server / bi-directional)
 
--
-- Client must supply the callback URL (webhook) in the ```X-Callback-Url``` header
 
+> Client does GET on async endpoint  
+>> Client must supply the webhook in the ```X-Callback-Url``` header
+> 
+>> Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
+>
+>> Server responds with a status code ```202 Accepted``` indicating processing has started
 
-- Client must supply a version 4 UUID correlation id in the ```X-Request-ID``` header
+> Server does POST with result on client webhook
+>> Server must echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
+>
+>> Server must do progressive retries until the webhook returns a status code ```200 Ok```
 
-
-- Server must initially respond with a status code ```202 Accepted```
-
-
-- Upon completion of processing the server must POST the complete response to the webhook and echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
-
-
-- Server must do progressive retries until the webhook returns a status code 200
-
-
-![img.png](webhook-async.png)
 
 ## Using polling (web to server / uni-directional)
 
-- Server must initially respond with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
+> Client does GET on async endpoint 
+>> Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
+>
+>> Server responds with status ```202 Accepted``` and the URL of the future resource in the ```Location``` header indicating processing has started
 
 
-- Client must retry on the new ```location``` as long as the server responds with status ```102 Processing```
-
-
-- Processing ends when server creates the new resource
-
-
-![img.png](polling-async.png)
+> Client does GET on the returned URL 
+>> Client must retry as long as the server responds with status ```102 Processing```
 
