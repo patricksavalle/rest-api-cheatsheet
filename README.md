@@ -9,13 +9,13 @@
 > - Health Check
 > - Server Template
 > - Error code decision table
-> - Asynchronuous communication patterns
+> - Asynchronous communication patterns
 >   - Using webhooks (server to server / bi-directional)
 >   - Using polling (web to server / uni-directional)
 >
 > [See also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
 
-# Coding Conventions
+## Coding Conventions
 
 - Build the API with consumers (developers) in mind--as a product in its own right.
 
@@ -236,7 +236,7 @@
 
 
 
-# Health check
+## Health check
 
 - Implement and monitor an uncached ```/health endpoint```, e.g.
 
@@ -262,7 +262,7 @@
 - Monitor Request Latency, Error-rate, Traffic and Cumulative Latency for individual endpoints 
 
 
-# Server Template
+## Server Template
 
 On the implementation level, every response is transformed into a request in the following steps:
 
@@ -276,22 +276,22 @@ On the implementation level, every response is transformed into a request in the
 
 Don’t use complex design patterns, a REST-server is ‘just’ a pipeline.
 
-# Error code decision table
+## Error code decision table
 
-|         | Authenticated | Valid URL | Authorized | status code      |
-|---------|---------------|-----------|------------|------------------|
-| Check 1 | -             | -         | -          | 401 Unauthorized |
-| Check 2 | +             | -         | -          | 404 Not found    |
-| Check 3 | +             | +         | -          | 403 Forbidden    |
-
-
-# Asynchronuous communication patterns
-
-In asynchronuous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
+|           | Valid location | Authenticated | Authorized | Valid arguments | status code      |
+|-----------|----------------|---------------|------------|-----------------|------------------|
+| Check 1   | -              |               |            |                 | 404 Not found    |
+| Check 2   | +              | -             |            |                 | 401 Unauthorized |
+| Check 3   | +              | +             | -          |                 | 403 Forbidden    |
+| Check 4   | +              | +             | +          | -               | 400 Bad request  |
 
 
-## Using webhooks (server to server / bi-directional)
+## Asynchronous communication patterns
 
+In asynchronous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
+
+
+### Using webhooks (server to server / bi-directional)
 
 > Client does GET on async endpoint  
 > - Client must supply the webhook in the ```X-Callback-Url``` header
@@ -306,7 +306,7 @@ In asynchronuous communication the client does not wait for the answer but eithe
 > UNTIL (webhook returns a status code ```200 Ok```OR timed out)
 
 
-## Using polling (web to server / uni-directional)
+### Using polling (web to server / uni-directional)
 
 > Client does GET on async endpoint 
 > - Server responds with status ```202 Accepted``` indicating processing has started
