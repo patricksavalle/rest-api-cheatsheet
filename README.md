@@ -17,7 +17,7 @@
 
 ## Coding Conventions
 
--  [ ] Build the API with consumers (developers) in mind--as a product in its own right.
+- [ ] Build the API with consumers (developers) in mind--as a product in its own right.
   * Not for a specific front-end.
   * Use use-cases and scenarios to validate your APIs UX.
 
