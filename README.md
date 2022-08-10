@@ -18,7 +18,6 @@
 ## Coding Conventions
 
 -  [ ] Build the API with consumers (developers) in mind--as a product in its own right.
-
   * Not for a specific front-end.
   * Use use-cases and scenarios to validate your APIs UX.
 
@@ -64,9 +63,7 @@
 
 
 - [ ] Use the Collection Metaphor, it's intuitive.
-
     * Two URLs per public resource in the domain model:
-
       * The resource collection (e.g. ```/orders```)
       * Individual resource within the collection (e.g. ```/orders/{keytype}/{key}```).
 
@@ -123,7 +120,6 @@
 
   
 - [ ] Responses are part of the interface, don't expose implementation details in them.
-
   * Return domain entities not database entities (use a (logical) domain model not a (technical) data model).
   * Don’t expose internal / coupling tables as two IDs.
 
