@@ -1,3 +1,5 @@
+> part of this **[DevOps Project Template](https://github.com/patricksavalle/devops-project-template)**
+
 # REST-API Cheat Sheet 
 
 > Use this standard to review your REST-API's. It's highly evolved and in use with multiple large Dutch companies.
