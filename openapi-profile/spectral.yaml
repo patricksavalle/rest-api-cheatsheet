@@ -1,0 +1,139 @@
+extends:
+  - spectral:oas
+
+rules:
+  rest-paths-use-major-version:
+    description: Public API paths must start with a major URL version such as /v1.
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^/(health|v[0-9]+(?:/|$))"
+
+  rest-paths-are-regular:
+    description: Paths must use lowercase kebab-case literals and lowerCamelCase path parameters.
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^/(?:health|v[0-9]+(?:/(?:[a-z0-9]+(?:-[a-z0-9]+)*|\\{[a-z][A-Za-z0-9]*\\}))*)$"
+
+  rest-paths-no-trailing-slash:
+    description: Paths must not use trailing slashes.
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "/$"
+
+  rest-paths-no-action-verbs:
+    description: Model actions as resources instead of imperative path segments.
+    severity: warn
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "/(get|create|update|delete|cancel|submit|approve|reject)(-|$)"
+
+  rest-paths-no-keytype-segments:
+    description: Do not encode key type in the URL, for example /orders/orderid/{id}.
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "/[a-z0-9-]*id/\\{"
+
+  rest-operation-id-required:
+    description: Every operation needs a stable operationId for SDKs, docs, and tests.
+    severity: error
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: operationId
+      function: truthy
+
+  rest-error-responses-use-problem-json:
+    description: Every 4xx and 5xx response must use application/problem+json.
+    severity: error
+    given: "$.paths[*][*].responses[?(@property.match(/^[45][0-9][0-9]$/))]"
+    then:
+      field: content.application/problem+json
+      function: truthy
+
+  rest-post-created-has-location:
+    description: POST 201 responses must include a Location header.
+    severity: error
+    given: "$.paths[*].post.responses.201"
+    then:
+      field: headers.Location
+      function: truthy
+
+  rest-accepted-has-location:
+    description: 202 responses must include a Location header pointing to the operation resource.
+    severity: error
+    given: "$.paths[*][post,put,patch,delete].responses.202"
+    then:
+      field: headers.Location
+      function: truthy
+
+  rest-accepted-has-retry-after:
+    description: 202 responses should include Retry-After to guide polling clients.
+    severity: warn
+    given: "$.paths[*][post,put,patch,delete].responses.202"
+    then:
+      field: headers.Retry-After
+      function: truthy
+
+  rest-patch-declares-standard-media-type:
+    description: PATCH must use JSON Merge Patch or JSON Patch.
+    severity: error
+    given: "$.paths[*].patch.requestBody.content"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          anyOf:
+            - required:
+                - application/merge-patch+json
+            - required:
+                - application/json-patch+json
+
+  rest-429-has-retry-after:
+    description: 429 responses must include Retry-After where possible.
+    severity: warn
+    given: "$.paths[*][*].responses.429"
+    then:
+      field: headers.Retry-After
+      function: truthy
+
+  rest-collection-get-has-limit:
+    description: Top-level collection GET operations must declare a limit query parameter.
+    severity: error
+    given: "$.paths[?(@property.match(/^\\/v[0-9]+\\/[a-z0-9]+(?:-[a-z0-9]+)*$/))].get.parameters"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            required:
+              - name
+              - in
+            properties:
+              name:
+                const: limit
+              in:
+                const: query
+
+  rest-write-operations-declare-security:
+    description: Write operations must declare security requirements.
+    severity: error
+    given: "$.paths[*][post,put,patch,delete]"
+    then:
+      field: security
+      function: truthy

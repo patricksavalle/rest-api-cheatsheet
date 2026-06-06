@@ -1,0 +1,352 @@
+openapi: 3.1.0
+info:
+  title: Example Orders API
+  version: 1.0.0
+  description: Minimal API demonstrating the REST API Standard profile.
+servers:
+  - url: https://api.example.com
+security:
+  - OAuth2ClientCredentials:
+      - read
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Get service health.
+      security: []
+      responses:
+        "200":
+          description: Service health.
+          headers:
+            Cache-Control:
+              $ref: "./components.yaml#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "./components.yaml#/components/schemas/Health"
+        "503":
+          $ref: "./components.yaml#/components/responses/ServiceUnavailable"
+  /v1/orders:
+    get:
+      operationId: listOrders
+      summary: List orders.
+      parameters:
+        - $ref: "./components.yaml#/components/parameters/Limit"
+        - $ref: "./components.yaml#/components/parameters/Cursor"
+        - $ref: "./components.yaml#/components/parameters/Sort"
+        - $ref: "./components.yaml#/components/parameters/Fields"
+      responses:
+        "200":
+          description: Orders page.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - page
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Order"
+                  page:
+                    $ref: "./components.yaml#/components/schemas/Page"
+        "400":
+          $ref: "./components.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+    post:
+      operationId: createOrder
+      summary: Create an order.
+      security:
+        - OAuth2ClientCredentials:
+            - write
+      parameters:
+        - $ref: "./components.yaml#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrder"
+      responses:
+        "201":
+          description: Order created.
+          headers:
+            Location:
+              $ref: "./components.yaml#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "./components.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "./components.yaml#/components/responses/Conflict"
+        "415":
+          $ref: "./components.yaml#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "./components.yaml#/components/responses/UnprocessableContent"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+  /v1/orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get an order.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            $ref: "./components.yaml#/components/schemas/ResourceId"
+        - $ref: "./components.yaml#/components/parameters/IfNoneMatch"
+      responses:
+        "200":
+          description: Order.
+          headers:
+            ETag:
+              $ref: "./components.yaml#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "304":
+          description: Cached representation is still current.
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./components.yaml#/components/responses/NotFound"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+    patch:
+      operationId: updateOrder
+      summary: Partially update an order.
+      security:
+        - OAuth2ClientCredentials:
+            - write
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            $ref: "./components.yaml#/components/schemas/ResourceId"
+        - $ref: "./components.yaml#/components/parameters/IfMatch"
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrder"
+      responses:
+        "200":
+          description: Updated order.
+          headers:
+            ETag:
+              $ref: "./components.yaml#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "./components.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./components.yaml#/components/responses/NotFound"
+        "412":
+          $ref: "./components.yaml#/components/responses/PreconditionFailed"
+        "415":
+          $ref: "./components.yaml#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "./components.yaml#/components/responses/UnprocessableContent"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+    delete:
+      operationId: deleteOrder
+      summary: Delete an order.
+      security:
+        - OAuth2ClientCredentials:
+            - write
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            $ref: "./components.yaml#/components/schemas/ResourceId"
+        - $ref: "./components.yaml#/components/parameters/IfMatch"
+      responses:
+        "204":
+          description: Order deleted.
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./components.yaml#/components/responses/NotFound"
+        "412":
+          $ref: "./components.yaml#/components/responses/PreconditionFailed"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+  /v1/export-jobs:
+    post:
+      operationId: createExportJob
+      summary: Start an export job.
+      security:
+        - OAuth2ClientCredentials:
+            - write
+      parameters:
+        - $ref: "./components.yaml#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - open
+                    - closed
+      responses:
+        "202":
+          description: Export job accepted.
+          headers:
+            Location:
+              $ref: "./components.yaml#/components/headers/Location"
+            Retry-After:
+              $ref: "./components.yaml#/components/headers/RetryAfter"
+          content:
+            application/json:
+              schema:
+                $ref: "./components.yaml#/components/schemas/Job"
+        "400":
+          $ref: "./components.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "415":
+          $ref: "./components.yaml#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "./components.yaml#/components/responses/UnprocessableContent"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+  /v1/export-jobs/{jobId}:
+    get:
+      operationId: getExportJob
+      summary: Get export job state.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            $ref: "./components.yaml#/components/schemas/ResourceId"
+      responses:
+        "200":
+          description: Export job state.
+          content:
+            application/json:
+              schema:
+                $ref: "./components.yaml#/components/schemas/Job"
+        "401":
+          $ref: "./components.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./components.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./components.yaml#/components/responses/NotFound"
+        "429":
+          $ref: "./components.yaml#/components/responses/TooManyRequests"
+        "500":
+          $ref: "./components.yaml#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    OAuth2ClientCredentials:
+      $ref: "./components.yaml#/components/securitySchemes/OAuth2ClientCredentials"
+  schemas:
+    CreateOrder:
+      type: object
+      additionalProperties: false
+      required:
+        - customerEmail
+        - items
+      properties:
+        customerEmail:
+          type: string
+          format: email
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - sku
+              - quantity
+            properties:
+              sku:
+                type: string
+              quantity:
+                type: integer
+                minimum: 1
+    UpdateOrder:
+      type: object
+      additionalProperties: false
+      properties:
+        customerEmail:
+          type: string
+          format: email
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - canceled
+    Order:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - total
+        - createdAt
+      properties:
+        id:
+          $ref: "./components.yaml#/components/schemas/ResourceId"
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - canceled
+        total:
+          $ref: "./components.yaml#/components/schemas/Money"
+        createdAt:
+          $ref: "./components.yaml#/components/schemas/Rfc3339DateTime"
