@@ -6,52 +6,8 @@ passes through the same stages, each stage has one responsibility, failures are
 classified at the earliest correct point, and mutations happen only after all
 preconditions are known.
 
-## Core rule
-
-Process each request in this order:
-
-1. Parse method, path, headers, query, and body.
-2. Authenticate.
-3. Match route.
-4. Authorize.
-5. Validate media type, headers, query, and body.
-6. Enforce idempotency and preconditions.
-7. Execute domain operation.
-8. Persist atomically where mutation is required.
-9. Build response representation.
-10. Apply caching, tracing, and security headers.
-11. Emit logs, metrics, and events.
-
-Fail fast at the earliest step that can classify the error.
-
-## Pipeline state
-
-Use one request context object that is enriched by each stage. Do not pass raw
-framework request objects into domain code.
-
-```text
-RequestContext
-  rawRequest
-  method
-  path
-  headers
-  query
-  body
-  correlationId
-  traceContext
-  principal
-  route
-  routeParams
-  permissions
-  idempotencyKey
-  preconditions
-  domainCommand
-  domainResult
-  response
-```
-
-The context separates transport concerns from domain work. Domain code receives
-only validated commands and returns domain results or domain errors.
+Every request passes through the same ordered pipeline. Fail fast at the
+earliest stage that can classify the error.
 
 ## Stage responsibilities
 
@@ -68,6 +24,9 @@ only validated commands and returns domain results or domain errors.
 | 9 | Build response | Map domain result to documented response representation. | `500` |
 | 10 | Apply headers | Add cache, tracing, security, and representation headers. | `500` |
 | 11 | Emit telemetry and events | Emit logs, metrics, traces, and post-commit events. | no response change |
+
+Keep transport concerns out of domain code. Convert validated HTTP input into a
+domain command before executing business rules.
 
 ## Stage details
 
