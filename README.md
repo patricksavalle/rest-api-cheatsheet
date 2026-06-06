@@ -1,6 +1,6 @@
 > Part of this **[DevOps Project Template](https://github.com/patricksavalle/devops-project-template)**.
 
-# REST API Standard
+# REST API Standard and AI Skills
 
 Use this standard to design, review, and govern HTTP JSON APIs. The goal is a
 complete, minimal, predictable interface: regular resource URLs, standard HTTP
