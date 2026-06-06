@@ -11,6 +11,7 @@ compatibility rules.
 
 - [Principles](#principles)
 - [Contract](#contract)
+- [Enforcement artifacts](#enforcement-artifacts)
 - [Resource model](#resource-model)
 - [URLs](#urls)
 - [Methods](#methods)
@@ -64,6 +65,19 @@ Problem responses:
 ```http
 Content-Type: application/problem+json
 ```
+
+## Enforcement artifacts
+
+This repository includes optional artifacts for applying the standard:
+
+- [`openapi-profile/components.yaml`](openapi-profile/components.yaml): reusable
+  OpenAPI schemas, parameters, headers, responses, and security schemes.
+- [`openapi-profile/spectral.yaml`](openapi-profile/spectral.yaml): deterministic
+  OpenAPI lint rules for the enforceable parts of the standard.
+- [`openapi-profile/example-api.yaml`](openapi-profile/example-api.yaml): minimal
+  example API using the profile.
+- [`skills/rest-api-review/SKILL.md`](skills/rest-api-review/SKILL.md): AI-agent
+  skill for subjective review and REST API design judgment.
 
 ## Resource model
 

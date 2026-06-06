@@ -1,0 +1,376 @@
+openapi: 3.1.0
+info:
+  title: REST API Standard Components
+  version: 1.0.0
+  description: Reusable OpenAPI components for APIs following the REST API Standard.
+paths: {}
+components:
+  securitySchemes:
+    OAuth2ClientCredentials:
+      type: oauth2
+      description: OAuth 2.0 client credentials flow for machine-to-machine APIs.
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.com/oauth2/token
+          scopes:
+            read: Read resources.
+            write: Create, update, and delete resources.
+    BearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ResourceId:
+      type: string
+      minLength: 1
+      description: Opaque public resource identifier. Clients must not parse it.
+      examples:
+        - ord_123
+    Rfc3339DateTime:
+      type: string
+      format: date-time
+      description: RFC 3339 timestamp with timezone, preferably UTC.
+      examples:
+        - "2026-06-06T12:30:00Z"
+    Money:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          pattern: "^-?[0-9]+(\\.[0-9]+)?$"
+          description: Decimal amount encoded as a string to avoid floating point loss.
+          examples:
+            - "42.50"
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: ISO 4217 currency code.
+          examples:
+            - EUR
+    Page:
+      type: object
+      additionalProperties: false
+      required:
+        - limit
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        nextCursor:
+          type: string
+          minLength: 1
+          description: Opaque continuation token.
+    ProblemDetails:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          default: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
+    ValidationError:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - reason
+      properties:
+        field:
+          type: string
+          examples:
+            - items[0].quantity
+        reason:
+          type: string
+          examples:
+            - must be greater than zero
+    Job:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - createdAt
+      properties:
+        id:
+          $ref: "#/components/schemas/ResourceId"
+        status:
+          type: string
+          enum:
+            - queued
+            - running
+            - succeeded
+            - failed
+            - canceled
+        createdAt:
+          $ref: "#/components/schemas/Rfc3339DateTime"
+        resultUrl:
+          type: string
+          format: uri-reference
+        problem:
+          $ref: "#/components/schemas/ProblemDetails"
+    WebhookEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - type
+        - createdAt
+        - subject
+      properties:
+        id:
+          $ref: "#/components/schemas/ResourceId"
+        type:
+          type: string
+          pattern: "^[a-z0-9]+(?:\\.[a-z0-9]+)+$"
+          examples:
+            - order.created
+        createdAt:
+          $ref: "#/components/schemas/Rfc3339DateTime"
+        subject:
+          type: object
+          additionalProperties: false
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              examples:
+                - order
+            id:
+              $ref: "#/components/schemas/ResourceId"
+    Health:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - checkedAt
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+        checkedAt:
+          $ref: "#/components/schemas/Rfc3339DateTime"
+        dependencies:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - name
+              - status
+            properties:
+              name:
+                type: string
+              status:
+                type: string
+                enum:
+                  - healthy
+                  - degraded
+                  - unhealthy
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque continuation token from the previous response.
+      schema:
+        type: string
+        minLength: 1
+    Sort:
+      name: sort
+      in: query
+      description: Comma-separated response fields. Prefix a field with '-' for descending order.
+      schema:
+        type: string
+      examples:
+        newestFirst:
+          value: -createdAt,orderNumber
+    Fields:
+      name: fields
+      in: query
+      description: Comma-separated sparse fieldset using response field names.
+      schema:
+        type: string
+      examples:
+        summary:
+          value: id,status,total
+    IfMatch:
+      name: If-Match
+      in: header
+      description: Required representation version for conditional update or delete.
+      schema:
+        type: string
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      description: Representation version already held by the client.
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      description: Client-generated key used to safely retry duplicate-sensitive writes.
+      schema:
+        type: string
+        minLength: 8
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      description: Preferred language for localized responses.
+      schema:
+        type: string
+    Traceparent:
+      name: traceparent
+      in: header
+      description: W3C distributed tracing context.
+      schema:
+        type: string
+  headers:
+    Location:
+      description: URL of the created resource or accepted operation.
+      schema:
+        type: string
+        format: uri-reference
+    RetryAfter:
+      description: Delay before retrying, expressed as seconds or an HTTP date.
+      schema:
+        oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+    ETag:
+      description: Representation version.
+      schema:
+        type: string
+    CacheControlNoStore:
+      description: Prevents storage of sensitive or frequently changing responses.
+      schema:
+        type: string
+        const: no-store
+    WWWAuthenticate:
+      description: Authentication challenge for invalid or missing credentials.
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Malformed request syntax, JSON, parameter shape, or required header.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Unauthorized:
+      description: Missing, expired, or invalid authentication.
+      headers:
+        WWW-Authenticate:
+          $ref: "#/components/headers/WWWAuthenticate"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Forbidden:
+      description: Authenticated principal is not allowed to perform the operation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    NotFound:
+      description: Route or resource does not exist, or existence must not be revealed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    MethodNotAllowed:
+      description: Path exists but method is not supported.
+      headers:
+        Allow:
+          description: Allowed methods for the resource.
+          schema:
+            type: string
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Conflict:
+      description: Request conflicts with current domain state.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    PreconditionFailed:
+      description: If-Match or another precondition failed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    UnsupportedMediaType:
+      description: Unsupported request Content-Type.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    UnprocessableContent:
+      description: Request is syntactically valid but semantically invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    InternalServerError:
+      description: Unexpected server failure.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    ServiceUnavailable:
+      description: Temporary service or dependency outage.
+      headers:
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
