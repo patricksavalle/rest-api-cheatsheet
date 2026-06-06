@@ -9,19 +9,15 @@ compatibility rules.
 
 ## Repo contents
 
-- [`README.md`](README.md): human-readable REST API Standard.
-- [`openapi-profile/components.yaml`](openapi-profile/components.yaml): reusable
-  OpenAPI schemas, parameters, headers, responses, and security schemes.
-- [`openapi-profile/spectral.yaml`](openapi-profile/spectral.yaml): Spectral
-  ruleset for deterministic OpenAPI checks.
-- [`openapi-profile/example-api.yaml`](openapi-profile/example-api.yaml):
-  minimal API example following the profile.
-- [`request-to-response-pipeline/README.md`](request-to-response-pipeline/README.md):
-  expanded request handler pipeline with failure classification and pseudocode.
-- [`skills/request-to-response-pipeline/SKILL.md`](skills/request-to-response-pipeline/SKILL.md):
-  generic AI-agent skill for request handler pipeline design and review.
-- [`skills/rest-api-review/SKILL.md`](skills/rest-api-review/SKILL.md): AI-agent
-  skill for REST API design and review.
+| Path | Purpose |
+| --- | --- |
+| [`README.md`](README.md) | Human-readable REST API Standard. |
+| [`openapi-profile/components.yaml`](openapi-profile/components.yaml) | Reusable OpenAPI schemas, parameters, headers, responses, and security schemes. |
+| [`openapi-profile/spectral.yaml`](openapi-profile/spectral.yaml) | Spectral ruleset for deterministic OpenAPI checks. |
+| [`openapi-profile/example-api.yaml`](openapi-profile/example-api.yaml) | Minimal API example following the profile. |
+| [`request-to-response-pipeline/README.md`](request-to-response-pipeline/README.md) | Expanded request handler pipeline with failure classification and pseudocode. |
+| [`skills/request-to-response-pipeline/SKILL.md`](skills/request-to-response-pipeline/SKILL.md) | Generic AI-agent skill for request handler pipeline design and review. |
+| [`skills/rest-api-review/SKILL.md`](skills/rest-api-review/SKILL.md) | AI-agent skill for REST API design and review. |
 
 ## Table of contents
 
