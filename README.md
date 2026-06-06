@@ -1,314 +1,569 @@
-> part of this **[DevOps Project Template](https://github.com/patricksavalle/devops-project-template)**
-
-# REST-API Cheat Sheet 
-
-> Use this standard to review your REST-API's. It's highly evolved and in use with multiple large Dutch companies.
-> 
-> 
-> Contents:
-> 
-> - [Coding Conventions](#coding-conventions)
-> - [Interface Quality](#interface-quality)
-> - [Server Template](#server-template)
-> - [Error code decision table](#error-code-decision-table)
-> - [Asynchronous communication patterns](#asynchronous-communication-patterns)
->   - [Using webhooks (server to server / bi-directional)](#using-webhooks-server-to-server--bi-directional)
->   - [Using polling (web to server / uni-directional)](#using-polling-web-to-server--uni-directional)
->
-> [See also 'REST design patterns'](https://medium.com/@patricksavalle/rest-api-design-as-a-craft-not-an-art-a3fd97ed3ef4)
-
-## Coding Conventions
-
-- [ ] Build the API with consumers (developers) in mind--as a product in its own right.
-  * Not for a specific front-end.
-  * Use use-cases and scenarios to validate your APIs UX.
-
-
-- [ ] Use a domain model ([example domain model](https://i.imgur.com/55qxMz6h.png)), even if it needs to be reverse engineered (keep it simple)
-  * Base resources and URLs on the entities and relationships of your domain model.
-
-
-- [ ] Create an OpenAPI file for your API before you start implementing the REST-server
-
-
-- [ ] Use a naming convention
-
-  * Use plural forms for resources (```orders``` instead of ```order```), it's the datamodelling standard.
-  * Use lowercase in constant parts of paths, e.g: ```/lowercase```, not ```/CamelCase``` or ```/UPPERCASE```.
-  * Use camelCase field names, e.g.: ```fieldName```, not ```FieldName``` or ```field_name```
-  * Use UpperCamelCase object names, e.g.: ```TicketObject```, not ```ticketObject``` or ```ticket_object```
-  *	Avoid snake_case and kebab-case.
-
-
-- [ ] Use the HTTP verbs to mean this:
-
-    * POST - create and all other non-idempotent operations.
-    * PUT - replace.
-    * PATCH - (partial) update.
-    * GET - read a resource or collection.
-    * DELETE - remove a resource or collection.
-
-
-- [ ] Ensure that your GET, PUT, PATCH and DELETE operations are all [idempotent](http://www.restapitutorial.com/lessons/idempotency.html).
-
-
-- [ ] Use [HTTP status codes](https://httpstatuses.com/) to meaning this:
-  * 102 - Processing. Returned as long as a asynchronous response is still pending. See also 202 Accepted.
-  * 200 - Success.
-  * 201 - Created. Returned on successful creation of a new resource. Include a 'Location' header with a link to the newly-created resource.
-  * 202 - Accepted. Returned to indicated an asynchronous response will be given. Include a 'Location' HTTP-header with URL of the future resource. See also 102 Processing.
-  * 204 - No content (for empty responses)
-  * 304 - Not modified. Returned when a client asks for an etag it already received (sent in the request headers). See _caching_ below.
-  * 400 - Bad request. Data issues such as invalid JSON, etc.
-  * 404 - Not found. Resource not found on GET.
-  * 409 - Conflict. Duplicate data or invalid data state would occur.
-
-
-- [ ] Use the Collection Metaphor, it's intuitive.
-    * Two URLs per public resource in the domain model:
-      * The resource collection (e.g. ```/orders```)
-      * Individual resource within the collection (e.g. ```/orders/{keytype}/{key}```).
-
-            e.g.
-
-            POST /orders                          
-            GET /orders                           
-            GET /orders/orderid/$id
-            PUT /orders/orderid/$id
-            PATCH /orders/orderid/$id
-            DELETE /orders/orderid/$id
-
-            
-- [ ] Reflect the hierarchy of the domain model in the URLs, use the same names
-
-  * The first path-segment is the type of the resource in the response
-  
-        e.g.
-
-        GET /wholes/$id           // returns a 'whole'
-        GET /parts/wholeid/$id    // returns 'parts' for a specified whole
-        GET /parts/partsid/$id    // returns a part by it id 
-        
-  * Don't be dogmatic, flat and non-domain-model URLs are sometimes needed. 
-  
-        e.g.
-        
-        GET /parts/[subpartid}]
-        GET /frontpage
-
-
-- [ ] Use [Simple Versioning](https://simver.org/)
-  * A normal version number MUST take the form X.Y where X is the major version and Y is the minor version.
-  * Minor version MUST be incremented for any release which maintains backwards compatibility to the public API.
-  * Major version MUST be incremented if any backwards incompatible changes are introduced to the public API.
-  * Keep the API backward compatible as long as possible / avoid breaking changes
-  * API's based on a domain model are the most stable
-  * Versioning via the URL signifies a 'platform' version and the entire platform must be versioned at the same time
-  * Use only major versions in the url as newer minor versions are (should be) backward compatible
-
-        e.g.
-
-        https://api.example.com/v1/orders
-
-  * Versioning via the Accept header is versioning the resource, avoid this.
-
-        e.g.
-
-        GET /jobs HTTP/1.1
-        Host: api.example.com
-        Accept: application/vnd.example.api+json;version=2
-
-  * Additions to a response do not require versioning. However, additions to a request body that are 'required' are troublesome--and may require versioning (breaking changes).
-
-  
-- [ ] Responses are part of the interface, don't expose implementation details in them.
-  * Return domain entities not database entities (use a (logical) domain model not a (technical) data model).
-  * Don’t expose internal / coupling tables as two IDs.
-
-
-- [ ] Support sorting and pagination on collections (```?offset=100&limit=50&order=id```).
-
-
-- [ ] For large responses, allow clients to select the fields that come back in the response (with query-arguments, ```?fields=name&fields=address&fields=city```)
-
-
-- [ ] Use UTF-8 character encoding.
-
-
-- [ ] Use ISO 8601 for dates. 
-
-      E.g. 
-
-      1997-07-16T19:20:30+01:00   # time-offset
-      1997-07-16T19:20:30Z        # Zulu-time
-      1997-07-16T19:20:30EST      # time-zone
-      1997-07-16T19:20:30         # local datetime
-
-
-- [ ] Use ISO 4217 for currency codes.
-
-
-- [ ] Use ISO 3166 for country codes.
-
-
-- [ ] Use [RFC7807](https://tools.ietf.org/html/rfc7807) for error messages.
-
-
-- [ ] Avoid HATEOAS, while elegant hypermedia linking (HATEOAS) and versioning is troublesome no matter what--minimize it.
-
-
-- [ ] Don’t use OData, in particular avoid OData function calls as they violate REST-principles (remodel functions calls to resource manipulations)--stick to basic REST.
-
-
-- [ ] Use [OAuth2](http://oauth.net/2/) to secure your API.
-  * Use an auto-expiring Bearer token for authentication (```Authorisation: Bearer f0ca4227-64c4-44e1-89e6-b27c62ac2eb6```).
-  * Require HTTPS.
-  * Consider using [JSON Web Tokens](https://jwt.io/).
-
-
-- [ ] Enforce use of the Content-Type and Accept-Type headers even if you use JSON as default for both requests and responses.
-
-      e.g.
-
-      Content-Type: application/json
-      Accept-Type: application/json
-
-
-- [ ] Responses contain header: ```X-Content-Type-Options: nosniff```
-
-
-- [ ] Responses contain header: ```X-Frame-Options: deny```
-
-
-- [ ] For multi-lingual APIs, use the Accept-Language header for locale setting (```Accept-Language: nl, en-gb;q=0.8, en;q=0.7```)
-
-
-- [ ] All endpoints return the Date header
-    * Date - Date and time the response was returned (in RFC1123 format) (```Date: Sun, 06 Nov 1994 08:49:37 GMT```)
-
-
-- [ ] Implement strong caching (by client, transport, proxy, etc.) through the ```cache-control``` response-header. As a minimum have public GET-endpoints return the following response headers:
-    * [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) - The maximum number of seconds (ttl) a response can be cached. (```Cache-Control: public, 360``` or ```Cache-Control: no-store```)
-    * Strong caching minimizes the number of requests a server receives
-
-
-- [ ] Consider weak caching through the ```ETag``` response-header 
-    * [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) - Use a SHA1 hash for the version of a resource. Make sure to include the media type in the hash value, because that makes a different representation. (```ETag: "2dbc2fd2358e1ea1b7a6bc08ea647b9a337ac92d"```). The client needs to send a **[If-None-Match](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)** header for this mechanism to work.
-    * Weak caching minimizes the work a server needs to do (but not the number of requests it receives)
-
-
-- [ ] Enable header-based caching on all proxies and clients (e.g. NGINX, Apache, APIM) to increase speed and robustness
-
-
-- [ ] No privacy or security compromising data in URL's
-
-- [ ] Implement and monitor an uncached ```/health endpoint```, e.g.
-
-        GET /api/health
-       
-        {
-          "healthy": true,
-          "dependencies": [
-            {
-              "name": "serviceA",
-              "healthy": true
-            },
-            {
-              "name": "serviceB",
-              "healthy": true
-            }
-          ]
-        }
-
-
-**For API's that need content / payload encrypytion**
-
-
-- [ ] Implement content encryption on the furthest endpoints (in the REST-server, not the proxies or APIM)
-
-
-- [ ] When content signing is used, this is done after the content is (optionally) encrypted.
-
-
-- [ ] Use the **X-Signing-Algorithm** header to communicate the type of [content signing](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Signing-Algorithm: RS256```) 
-
-
-- [ ] Use the **X-SHA256-Checksum** header to communicate the SHA256 hash value of the content (```X-SHA256-Checksum: e1d58ba0a1810d6dca5f086e6e36a9d81a8d4bb00378bdab30bdb205e7473f87```) 
-
-
-- [ ] Use the **X-Encryption-Algorithm** header to communicate the type of [content encryption](https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3) (```X-Encryption-Algorithm: A128CBC-HS256```) 
-
-
-## Interface quality
-
-A good API (as any other interface) is
-
-  * Consistent (avoid surprises by being predictable)
-  * Cohesive (only lists endpoints with functional dependency)
-  * Complete (has all necessary endpoints for its purpose)
-  * Minimal (no more endpoints than neccessary to be complete, no featurism)
-  * Encapsulating (hiding implementation details)
-  * Self explaining
-  * Documented (if self explanation is not sufficient)
-
-## Server template
-
-On the implementation level, every response is transformed into a request in the following steps:
-
-1. check authentication
-1. check URL 
-1. check authorisation
-1. validate, decrypt input
-1. **do the actual transformation / CRUD**
-1. encode, encrypt output
-1. (optionally) send notifications (broadcast the event)
-
-- Don’t use complex design patterns, a REST-server is ‘just’ a pipeline.
-- Code for observability (logging, tracing, metrics)
-- Code for testability (feature toggles, user rings, failure injection, etc.)
-- Monitor Request Latency, Error-rate, Traffic and Cumulative Latency for individual endpoints
-
-
-
-
-## Error code decision table
-
-|           | Valid location | Authenticated | Authorized | Valid arguments | status code      |
-|-----------|----------------|---------------|------------|-----------------|------------------|
-| Check 1   | -              |               |            |                 | 404 Not found    |
-| Check 2   | +              | -             |            |                 | 401 Unauthorized |
-| Check 3   | +              | +             | -          |                 | 403 Forbidden    |
-| Check 4   | +              | +             | +          | -               | 400 Bad request  |
-
-
-## Asynchronous communication patterns
-
-In asynchronous communication the client does not wait for the answer but either gets called back once the answer is available or checks later.
-
-
-### Using webhooks (server to server / bi-directional)
-
-> Client does GET on async endpoint  
-> - Client must supply the webhook in the ```X-Callback-Url``` header
-> - Client must supply a UUID-V4 correlation id in the ```X-Request-ID``` header
-> - Server responds with a status code ```202 Accepted``` indicating processing has started
-
-> REPEAT
->> Server does POST with result on client webhook
->> - Server must echo the ```X-Request-ID``` header in the ```X-Response-ID``` header
->> - Server must use HMAC-SHA256 signing for request authentication (use header ```X-Signing-Algorithm: RS256```)
->
-> UNTIL (webhook returns a status code ```200 Ok```OR timed out)
-
-
-### Using polling (web to server / uni-directional)
-
-> Client does GET on async endpoint 
-> - Server responds with status ```202 Accepted``` indicating processing has started
-> - Server returns the URL of the future resource in the ```Location``` header 
-
-> DO
->> Client does GET on the returned URL 
-> 
-> WHILE (server responds with status ```102 Processing``` AND NOT timed out)
-
+> Part of this **[DevOps Project Template](https://github.com/patricksavalle/devops-project-template)**.
+
+# REST API Standard
+
+Use this standard to design, review, and govern HTTP JSON APIs. The goal is a
+complete, minimal, predictable interface: regular resource URLs, standard HTTP
+semantics, explicit contracts, stable error handling, safe retries, and clear
+compatibility rules.
+
+## Table of contents
+
+- [Principles](#principles)
+- [Contract](#contract)
+- [Resource model](#resource-model)
+- [URLs](#urls)
+- [Methods](#methods)
+- [Status codes](#status-codes)
+- [Requests and responses](#requests-and-responses)
+- [Errors](#errors)
+- [Collections](#collections)
+- [Concurrency and caching](#concurrency-and-caching)
+- [Asynchronous operations](#asynchronous-operations)
+- [Webhooks](#webhooks)
+- [Security](#security)
+- [Compatibility and versioning](#compatibility-and-versioning)
+- [Health and observability](#health-and-observability)
+- [Implementation pipeline](#implementation-pipeline)
+- [Review checklist](#review-checklist)
+- [References](#references)
+
+## Principles
+
+A high-quality REST API is:
+
+- **Consumer-first**: designed for external developers, not for one UI.
+- **Consistent**: the same concept always has the same shape.
+- **Cohesive**: every endpoint belongs to the API's domain purpose.
+- **Complete**: all necessary use cases are possible.
+- **Minimal**: no endpoint, field, parameter, or mode without a concrete use case.
+- **Encapsulated**: no database tables, joins, internal IDs, stack traces, or service
+  topology leak into the interface.
+- **Documented by contract**: the OpenAPI document is the source of truth.
+- **Boring by design**: least surprise beats cleverness.
+
+## Contract
+
+- Define the API in **OpenAPI 3.1** before implementation.
+- The contract must include every path, method, request schema, response schema,
+  status code, error type, security requirement, parameter, header, and example.
+- Validate requests and responses against the contract in tests.
+- Fail the build on undocumented endpoints, undocumented response codes, and
+  breaking contract changes.
+- Use JSON unless a specific endpoint needs another media type.
+
+Default media types:
+
+```http
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+```
+
+Problem responses:
+
+```http
+Content-Type: application/problem+json
+```
+
+## Resource model
+
+- Base URLs on domain resources, not implementation tables or UI screens.
+- Use nouns for resources.
+- Use verbs only when they are represented as resources.
+- Keep public IDs opaque. Clients must not infer meaning, type, order, shard, or
+  storage location from an ID.
+
+Good:
+
+```http
+/v1/orders
+/v1/orders/{orderId}
+/v1/orders/{orderId}/items
+/v1/password-resets
+/v1/export-jobs
+/v1/orders/{orderId}/cancellations
+```
+
+Avoid:
+
+```http
+/getOrders
+/orders/orderid/{id}
+/orders/{id}/cancel
+/orders-by-customer
+/tbl_order_header
+```
+
+## URLs
+
+- Put the major API version in the URL: `/v1`.
+- Use plural resource names: `/orders`, not `/order`.
+- Use lowercase kebab-case for literal path segments.
+- Use lowerCamelCase for JSON fields and query parameters.
+- Use descriptive path parameter names: `{orderId}`, not `{id}` when nested.
+- Do not put ID type, database key type, format, privacy-sensitive data, secrets,
+  tokens, or authorization decisions in URLs.
+- Do not use trailing slashes.
+- Do not use file extensions such as `.json`.
+
+Canonical collection and item shape:
+
+```http
+GET    /v1/orders
+POST   /v1/orders
+GET    /v1/orders/{orderId}
+PUT    /v1/orders/{orderId}
+PATCH  /v1/orders/{orderId}
+DELETE /v1/orders/{orderId}
+```
+
+Nested resources are allowed when the child cannot be understood without the
+parent or the parent scopes access:
+
+```http
+GET  /v1/orders/{orderId}/items
+POST /v1/orders/{orderId}/items
+GET  /v1/orders/{orderId}/items/{itemId}
+```
+
+Keep nesting shallow. Prefer at most two resource levels after the version.
+
+## Methods
+
+| Method | Meaning | Safe | Idempotent | Typical success |
+| --- | --- | --- | --- | --- |
+| `GET` | Read one resource or a collection | yes | yes | `200`, `304` |
+| `POST` | Create a subordinate resource or start an operation | no | no | `201`, `202`, `200` |
+| `PUT` | Replace a complete resource | no | yes | `200`, `204` |
+| `PATCH` | Partially update a resource | no | depends | `200`, `204` |
+| `DELETE` | Remove a resource | no | yes | `204` |
+
+Rules:
+
+- `GET` must not change server state.
+- `PUT` replaces the full resource representation.
+- `PATCH` must declare exactly one patch format:
+  - `application/merge-patch+json` for JSON Merge Patch.
+  - `application/json-patch+json` for JSON Patch.
+- `DELETE` must remain idempotent. Repeating a successful delete should not create
+  a new side effect.
+- Duplicate-sensitive `POST` operations must support `Idempotency-Key`.
+
+## Status codes
+
+Use a small, predictable set.
+
+| Code | Use |
+| --- | --- |
+| `200 OK` | Successful read, update with body, or action result. |
+| `201 Created` | New resource created. Include `Location`. |
+| `202 Accepted` | Work accepted but not complete. Include operation URL in `Location`. |
+| `204 No Content` | Successful operation with no response body. |
+| `304 Not Modified` | Conditional `GET` matched the client's cached representation. |
+| `400 Bad Request` | Malformed JSON, invalid syntax, invalid parameter shape, or missing required header. |
+| `401 Unauthorized` | Missing, expired, or invalid authentication. Include `WWW-Authenticate`. |
+| `403 Forbidden` | Authenticated principal is not allowed to perform the operation. |
+| `404 Not Found` | Route or resource does not exist, or existence must not be revealed. |
+| `405 Method Not Allowed` | Path exists but method is not supported. Include `Allow`. |
+| `409 Conflict` | Request conflicts with current domain state. |
+| `412 Precondition Failed` | `If-Match` or another precondition failed. |
+| `415 Unsupported Media Type` | Unsupported request `Content-Type`. |
+| `422 Unprocessable Content` | Request is syntactically valid but semantically invalid. |
+| `429 Too Many Requests` | Rate limit exceeded. Include `Retry-After` when possible. |
+| `500 Internal Server Error` | Unexpected server failure. |
+| `503 Service Unavailable` | Temporary service or dependency outage. Include `Retry-After` when possible. |
+
+Avoid custom status codes. Avoid using `200` for errors.
+
+## Requests and responses
+
+- Use UTF-8.
+- Use RFC 3339 timestamps with timezone, preferably UTC:
+
+```json
+{
+  "createdAt": "2026-06-06T12:30:00Z"
+}
+```
+
+- Do not use local datetimes without offset.
+- Do not use timezone abbreviations such as `EST`.
+- Use ISO 4217 currency codes.
+- Use ISO 3166-1 alpha-2 country codes.
+- Boolean fields must be positive and unambiguous: `isActive`, not `isNotInactive`.
+- Arrays must always be arrays, never `null`.
+- Empty collections return `200` with an empty array, not `404`.
+- `204` responses must not include a body.
+
+Common headers:
+
+| Header | Direction | Use |
+| --- | --- | --- |
+| `Authorization` | request | Bearer access token. |
+| `Content-Type` | request/response | Media type of the body. |
+| `Accept` | request | Media types the client accepts. |
+| `Accept-Language` | request | Preferred response language when localized output exists. |
+| `Date` | response | HTTP response timestamp. |
+| `Location` | response | Created resource or accepted operation URL. |
+| `Retry-After` | response | Retry delay for `202`, `429`, or `503`. |
+| `ETag` | response | Representation version. |
+| `If-None-Match` | request | Conditional read. |
+| `If-Match` | request | Conditional update/delete. |
+| `Idempotency-Key` | request | Safe retry key for duplicate-sensitive writes. |
+| `traceparent` | request/response | Distributed tracing context. |
+
+## Errors
+
+Use Problem Details for all `4xx` and `5xx` responses.
+
+```json
+{
+  "type": "https://api.example.com/problems/validation-error",
+  "title": "Validation failed",
+  "status": 422,
+  "detail": "One or more fields are invalid.",
+  "instance": "/v1/orders",
+  "errors": [
+    {
+      "field": "customerEmail",
+      "reason": "must be a valid email address"
+    }
+  ]
+}
+```
+
+Rules:
+
+- `type` must identify a stable problem type.
+- `title` must be stable for the problem type.
+- `status` must match the HTTP status code.
+- `detail` may vary per occurrence.
+- `instance` identifies the request or affected resource.
+- Extension fields are allowed, but must be documented.
+- Do not expose stack traces, internal exception names, SQL, storage paths,
+  secret names, hostnames, or dependency topology.
+
+Recommended validation extension:
+
+```json
+{
+  "errors": [
+    {
+      "field": "items[0].quantity",
+      "reason": "must be greater than zero"
+    }
+  ]
+}
+```
+
+## Collections
+
+Collections must support documented pagination. Cursor pagination is the default
+for mutable or large collections.
+
+Request:
+
+```http
+GET /v1/orders?status=open&limit=50&cursor=eyJpZCI6IjEyMyJ9&sort=-createdAt,orderNumber&fields=id,status,total
+```
+
+Parameters:
+
+| Parameter | Meaning |
+| --- | --- |
+| `limit` | Maximum items to return. Must have a documented maximum. |
+| `cursor` | Opaque continuation token returned by the API. |
+| `sort` | Comma-separated field list. Prefix with `-` for descending. |
+| `fields` | Sparse fieldset using response field names. |
+
+Response:
+
+```json
+{
+  "data": [
+    {
+      "id": "ord_123",
+      "status": "open",
+      "total": {
+        "amount": "42.50",
+        "currency": "EUR"
+      }
+    }
+  ],
+  "page": {
+    "limit": 50,
+    "nextCursor": "eyJpZCI6IjEyNCJ9"
+  }
+}
+```
+
+Rules:
+
+- Sort and filter fields must be documented and indexed where needed.
+- Cursors are opaque. Clients must not parse them.
+- Do not use offset pagination for large or frequently changing collections.
+- Do not return unbounded collections.
+
+## Concurrency and caching
+
+Use `ETag` for resources that can be cached or updated concurrently.
+
+Conditional read:
+
+```http
+GET /v1/orders/{orderId}
+If-None-Match: "v3"
+```
+
+Unchanged response:
+
+```http
+304 Not Modified
+```
+
+Conditional update:
+
+```http
+PATCH /v1/orders/{orderId}
+If-Match: "v3"
+Content-Type: application/merge-patch+json
+```
+
+Stale response:
+
+```http
+412 Precondition Failed
+Content-Type: application/problem+json
+```
+
+Rules:
+
+- Require `If-Match` for updates where lost updates matter.
+- Include media type and representation version in ETag calculation.
+- Use `Cache-Control` deliberately:
+  - `no-store` for secrets, tokens, and sensitive user-specific responses.
+  - `private` for cacheable user-specific responses.
+  - `public, max-age=...` only for responses safe for shared caches.
+- Do not rely on cache defaults.
+
+## Asynchronous operations
+
+Model long-running work as an operation or job resource.
+
+Start:
+
+```http
+POST /v1/export-jobs
+Content-Type: application/json
+Idempotency-Key: 8b6f4a6c-7f6f-4a5b-9f7e-31b1ecf7a832
+```
+
+Response:
+
+```http
+202 Accepted
+Location: /v1/export-jobs/job_123
+Retry-After: 5
+```
+
+Poll:
+
+```http
+GET /v1/export-jobs/job_123
+```
+
+Running:
+
+```json
+{
+  "id": "job_123",
+  "status": "running",
+  "createdAt": "2026-06-06T12:30:00Z"
+}
+```
+
+Completed:
+
+```json
+{
+  "id": "job_123",
+  "status": "succeeded",
+  "resultUrl": "/v1/exports/exp_456"
+}
+```
+
+Rules:
+
+- Do not use `102 Processing` as a polling response.
+- Use `202` to accept work.
+- Use `200` to return current job state.
+- Job status values must be documented. Recommended values:
+  - `queued`
+  - `running`
+  - `succeeded`
+  - `failed`
+  - `canceled`
+
+## Webhooks
+
+Use webhooks only when polling is not sufficient.
+
+Subscription resource:
+
+```http
+POST /v1/webhook-subscriptions
+```
+
+Delivery:
+
+```http
+POST https://client.example.com/webhooks/orders
+Content-Type: application/json
+```
+
+Rules:
+
+- Webhook destinations must be registered and verified before use.
+- Include an event ID, event type, event time, and subject resource ID.
+- Sign deliveries with one documented mechanism.
+- If using HMAC, say `HMAC-SHA256`; do not call it `RS256`.
+- Include a timestamp in the signed material to prevent replay.
+- Retries must use exponential backoff and stop after a documented limit.
+- Receivers must treat duplicate event IDs idempotently.
+
+Example event:
+
+```json
+{
+  "id": "evt_123",
+  "type": "order.created",
+  "createdAt": "2026-06-06T12:30:00Z",
+  "subject": {
+    "type": "order",
+    "id": "ord_123"
+  }
+}
+```
+
+## Security
+
+- Require HTTPS.
+- Use OAuth 2.0 / OpenID Connect for delegated access.
+- Use bearer tokens only in the `Authorization` header.
+- Access tokens must expire.
+- Validate issuer, audience, expiry, signature, and required scopes.
+- Do not put tokens, secrets, passwords, personal data, or session identifiers in
+  URLs.
+- Enforce authorization after authentication and before domain mutation.
+- Use least-privilege scopes.
+- Validate every entry-point input.
+- Return `401` for missing or invalid authentication.
+- Return `403` for authenticated but unauthorized requests.
+- For browser-accessed APIs, configure CORS explicitly. Do not use wildcard
+  origins with credentials.
+- Return `X-Content-Type-Options: nosniff`.
+- Do not rely on `X-Frame-Options` for JSON APIs. Use it only for HTML responses
+  that can be rendered in a browser.
+
+## Compatibility and versioning
+
+- Use major URL versions: `/v1`, `/v2`.
+- Keep minor and patch releases backward compatible.
+- Additive response fields are backward compatible.
+- Removing fields, renaming fields, changing field meaning, changing required
+  request fields, changing error type semantics, and changing authorization
+  requirements are breaking changes.
+- Clients must ignore unknown response fields.
+- Servers must reject unknown request fields only when the contract says strict
+  request validation is enabled.
+- Deprecations must be documented before removal.
+- Deprecated endpoints should include a `Deprecation` header and, when known, a
+  `Sunset` header.
+
+## Health and observability
+
+Expose a health endpoint that is uncached and safe to call frequently.
+
+```http
+GET /health
+Cache-Control: no-store
+```
+
+Example:
+
+```json
+{
+  "status": "healthy",
+  "checkedAt": "2026-06-06T12:30:00Z",
+  "dependencies": [
+    {
+      "name": "database",
+      "status": "healthy"
+    }
+  ]
+}
+```
+
+Rules:
+
+- Health responses must not expose secrets, connection strings, hostnames,
+  internal URLs, or detailed dependency topology.
+- Emit structured logs, metrics, and traces.
+- Track request count, latency, error rate, saturation, dependency latency, and
+  status-code distribution per endpoint.
+- Propagate trace context with `traceparent`.
+
+## Implementation pipeline
+
+Process each request in this order:
+
+1. Parse method, path, headers, query, and body.
+2. Authenticate.
+3. Match route.
+4. Authorize.
+5. Validate media type, headers, query, and body.
+6. Enforce idempotency and preconditions.
+7. Execute domain operation.
+8. Persist atomically where mutation is required.
+9. Build response representation.
+10. Apply caching, tracing, and security headers.
+11. Emit logs, metrics, and events.
+
+Fail fast at the earliest step that can classify the error.
+
+## Review checklist
+
+- [ ] OpenAPI 3.1 contract exists and is the source of truth.
+- [ ] URLs follow `/v1/{resources}/{resourceId}` shape.
+- [ ] Resource names are plural nouns.
+- [ ] Literal path segments are lowercase kebab-case.
+- [ ] JSON fields and query parameters are lowerCamelCase.
+- [ ] IDs are opaque and never encode database or key type.
+- [ ] All methods use standard HTTP semantics.
+- [ ] `PATCH` format is explicitly documented.
+- [ ] Status codes use the minimal standard set.
+- [ ] All errors use Problem Details.
+- [ ] Collections are paginated and bounded.
+- [ ] Cursor tokens are opaque.
+- [ ] Concurrency-sensitive updates use `ETag` and `If-Match`.
+- [ ] Cache behavior is explicit.
+- [ ] Duplicate-sensitive writes support `Idempotency-Key`.
+- [ ] Async work is represented as a job or operation resource.
+- [ ] Webhooks are signed, replay-protected, retryable, and idempotent.
+- [ ] OAuth/OIDC validation is explicit.
+- [ ] No secrets or personal data appear in URLs or logs.
+- [ ] Breaking-change rules are documented and enforced.
+- [ ] Contract linting, contract tests, and breaking-change checks run in CI.
+
+## References
+
+- [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html)
+- [RFC 9111: HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111.html)
+- [RFC 9457: Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457.html)
+- [RFC 3339: Date and Time on the Internet](https://www.rfc-editor.org/rfc/rfc3339)
+- [RFC 6750: OAuth 2.0 Bearer Token Usage](https://www.rfc-editor.org/rfc/rfc6750)
+- [RFC 9700: OAuth 2.0 Security Best Current Practice](https://www.rfc-editor.org/rfc/rfc9700)
+- [RFC 7396: JSON Merge Patch](https://www.rfc-editor.org/rfc/rfc7396)
+- [RFC 6902: JSON Patch](https://www.rfc-editor.org/info/rfc6902)
+- [RFC 9562: UUIDs](https://www.rfc-editor.org/rfc/rfc9562)
+- [OpenAPI Specification 3.1](https://spec.openapis.org/oas/v3.1.1.html)
