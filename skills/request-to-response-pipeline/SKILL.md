@@ -66,6 +66,34 @@ domain command before executing business rules.
    - latency, route, method, status, dependency, and error metrics
    - no secrets, tokens, raw credentials, or unnecessary personal data
 
+## Enforcement Placement
+
+Prefer infrastructure, platform, framework, contract, generated code, or
+middleware over handwritten application code when it catches the same defect
+earlier and more consistently.
+
+| Concern | Preferred enforcement |
+| --- | --- |
+| TLS, size limits, coarse rate limits, WAF | gateway / load balancer |
+| Token signature, issuer, audience, expiry | gateway or auth middleware |
+| Route matching | framework router |
+| Request shape | OpenAPI validator / generated middleware |
+| Contract drift | CI lint, schema check, contract diff |
+| CORS and public cache policy | gateway / platform config |
+| Idempotency, `If-Match`, domain invariants | application + datastore / domain code |
+| Outbox and event publication | application + persistence layer |
+| Logs, metrics, traces | platform instrumentation plus app labels |
+
+Do not move domain-specific decisions into infrastructure unless the platform can
+express them without ambiguity.
+
+## Shift-Left Review
+
+For every pipeline rule, ask: can this be caught earlier by design, schema,
+OpenAPI lint, generated code, framework middleware, CI, deploy policy, gateway
+policy, or platform config? If yes, prefer the earlier enforcement point and
+remove duplicate late checks when safe.
+
 ## Failure Mapping
 
 Use this default mapping unless a stronger local standard overrides it:
