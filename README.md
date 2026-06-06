@@ -16,6 +16,10 @@ compatibility rules.
   ruleset for deterministic OpenAPI checks.
 - [`openapi-profile/example-api.yaml`](openapi-profile/example-api.yaml):
   minimal API example following the profile.
+- [`request-to-response-pipeline/README.md`](request-to-response-pipeline/README.md):
+  expanded request handler pipeline with failure classification and pseudocode.
+- [`skills/request-to-response-pipeline/SKILL.md`](skills/request-to-response-pipeline/SKILL.md):
+  generic AI-agent skill for request handler pipeline design and review.
 - [`skills/rest-api-review/SKILL.md`](skills/rest-api-review/SKILL.md): AI-agent
   skill for REST API design and review.
 
@@ -541,6 +545,10 @@ Rules:
 - Propagate trace context with `traceparent`.
 
 ## Implementation pipeline
+
+See [`request-to-response-pipeline/README.md`](request-to-response-pipeline/README.md)
+for the expanded operational model, failure classification, side-effect
+boundaries, and pseudocode.
 
 Process each request in this order:
 
