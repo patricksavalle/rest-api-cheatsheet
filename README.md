@@ -7,8 +7,21 @@ complete, minimal, predictable interface: regular resource URLs, standard HTTP
 semantics, explicit contracts, stable error handling, safe retries, and clear
 compatibility rules.
 
+## Repo contents
+
+- [`README.md`](README.md): human-readable REST API Standard.
+- [`openapi-profile/components.yaml`](openapi-profile/components.yaml): reusable
+  OpenAPI schemas, parameters, headers, responses, and security schemes.
+- [`openapi-profile/spectral.yaml`](openapi-profile/spectral.yaml): Spectral
+  ruleset for deterministic OpenAPI checks.
+- [`openapi-profile/example-api.yaml`](openapi-profile/example-api.yaml):
+  minimal API example following the profile.
+- [`skills/rest-api-review/SKILL.md`](skills/rest-api-review/SKILL.md): AI-agent
+  skill for REST API design and review.
+
 ## Table of contents
 
+- [Repo contents](#repo-contents)
 - [Principles](#principles)
 - [Contract](#contract)
 - [Enforcement artifacts](#enforcement-artifacts)
